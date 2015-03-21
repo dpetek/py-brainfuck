@@ -18,3 +18,13 @@ class FileOuputStream(OutputStream):
 
     def put_char(self, c):
         self.file.write(c)
+
+class StringOutputStream(OutputStream):
+    def __init__(self):
+        self.buffer = ""
+
+    def put_char(self, c):
+        self.buffer += c
+    
+    def get_string(self):
+        return self.buffer
