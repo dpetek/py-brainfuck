@@ -82,6 +82,3 @@ class Brainfuck(object):
 
             self.code_pointer = code_pointer
             current_iter += 1
-
-    def run_for_string(self, input_string, output_stream.sys.stdout, num_iters = None):
-        pass
