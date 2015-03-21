@@ -1,4 +1,6 @@
 import os, sys, re
+from bf_input_stream import StdinInputStream
+from bf_output_stream import StdoutOutputStream
 
 class Brainfuck(object):
     """
@@ -35,11 +37,12 @@ class Brainfuck(object):
                 self.jumps[prev] = i
 
     def __set_data(self, value):
-#       if value > 255:
-#           value -= 256
-#       if value < 0:
-#           value += 256
+        if value > 255: value -= 256
+        if value < 0: value += 256
         self.data[self.data_pointer] = value
+
+    def __get_data(self):
+        return self.data.get(self.data_pointer, 0)
 
     def __increment_data(self, delta):
         self.__set_data(self.data.get(self.data_pointer, 0) + delta)
@@ -68,27 +71,24 @@ class Brainfuck(object):
     def get_code_pointer_position(self):
         return self.code_pointer
 
-    def run(self, input_stream, output_stream = sys.stdout, num_iters = None):
-        num_iters = -1 if num_iters  == None else num_iters
+    def run(self, input_stream = StdinInputStream(), output_stream = StdoutOutputStream(), num_iters = None):
         current_iter = 0
-        while current_iter < num_iters and self.code_pointer < len(self.code):
+        while (num_iters == None or current_iter < num_iters) and self.code_pointer < len(self.code):
             command = self.code[self.code_pointer]
             if command == "<" or command == ">":
                 self.data_pointer += 1 if command  == ">" else -1
             elif command == "+" or command == "-":
-                delta = 1 if command == "+" else -1
-                self.__increment_data(delta)
+                self.__increment_data(1 if command == "+" else -1)
             elif command == ",":
                 self.__set_data(ord(input_stream.get_char()))
             elif command == '.':
-                output_stream.put_char(chr(self.data.get(self.data_pointer, 0)))
+                output_stream.put_char(chr(self.__get_data()))
 
-            code_pointer = self.code_pointer + 1
-            if command == "[" and self.data.get(self.data_pointer, 0) == 0:
-                code_pointer = self.jumps[self.code_pointer]
-            if command == "[" and not self.data.get(self.data_pointer, 0) == 0:
-                code_pointer = self.jumps[self.code_pointer]
+            cp = self.code_pointer + 1
+            if command == "[" and self.__get_data() == 0:
+                cp = self.jumps[self.code_pointer]
+            if command == "]" and not self.__get_data() == 0:
+                cp = self.jumps[self.code_pointer]
 
-            self.code_pointer = code_pointer
+            self.code_pointer = cp
             current_iter += 1
-            print self.data

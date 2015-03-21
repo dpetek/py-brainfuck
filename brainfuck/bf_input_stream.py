@@ -11,7 +11,9 @@ class StringInputStream(InputStream):
     def get_char(self):
         if self.index >= len(self.buffer):
             raise IndexError("Input buffer out of range.")
-        return self.buffer[self.index]
+        d = self.buffer[self.index]
+        self.index += 1
+        return d
 
 class FileInputStream(InputStream):
     def __init__(self, filepath):
