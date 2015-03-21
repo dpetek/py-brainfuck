@@ -34,6 +34,16 @@ class Brainfuck(object):
                 self.jumps[i] = prev
                 self.jumps[prev] = i
 
+    def __set_data(self, value):
+#       if value > 255:
+#           value -= 256
+#       if value < 0:
+#           value += 256
+        self.data[self.data_pointer] = value
+
+    def __increment_data(self, delta):
+        self.__set_data(self.data.get(self.data_pointer, 0) + delta)
+
     def get_jumps_map(self):
         """
             Get jumps destination map for all '[' and ']' in the code.
@@ -63,14 +73,13 @@ class Brainfuck(object):
         current_iter = 0
         while current_iter < num_iters and self.code_pointer < len(self.code):
             command = self.code[self.code_pointer]
-
             if command == "<" or command == ">":
                 self.data_pointer += 1 if command  == ">" else -1
             elif command == "+" or command == "-":
                 delta = 1 if command == "+" else -1
-                self.data[self.data_pointer] = self.data.get(self.data_pointer, 0 + delta)
+                self.__increment_data(delta)
             elif command == ",":
-                self.data[self.data_pointer] = ord(input_stream.get_char())
+                self.__set_data(ord(input_stream.get_char()))
             elif command == '.':
                 output_stream.put_char(chr(self.data.get(self.data_pointer, 0)))
 
@@ -82,3 +91,4 @@ class Brainfuck(object):
 
             self.code_pointer = code_pointer
             current_iter += 1
+            print self.data

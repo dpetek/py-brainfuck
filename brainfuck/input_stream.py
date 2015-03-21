@@ -1,3 +1,5 @@
+import sys
+
 class InputStream(object):
     def get_char(self):
         raise NotImplementedException("This is not a concrete implementation")
