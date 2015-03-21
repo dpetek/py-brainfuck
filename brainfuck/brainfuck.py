@@ -9,11 +9,11 @@ class Brainfuck(object):
         for only couple iteration and be restarted at any time.
     """
     def __init__(self, code):
-        self.jumps = {}
-        self.data = {}
-        self.data_pointer = 0
-        self.code_pointer = 0
+        self.jumps, self.data = {}, {}
+        self.data_pointer, self.code_pointer = 0, 0
         self.code = code
+
+        # code preprocessing
         self.__code_cleanup()
         self.__preprocess_jumps()
 
@@ -41,11 +41,14 @@ class Brainfuck(object):
         if value < 0: value += 256
         self.data[self.data_pointer] = value
 
+    def __increment_data(self, delta):
+        self.__set_data(self.data.get(self.data_pointer, 0) + delta)
+
     def __get_data(self):
         return self.data.get(self.data_pointer, 0)
 
-    def __increment_data(self, delta):
-        self.__set_data(self.data.get(self.data_pointer, 0) + delta)
+    def __get_command(self):
+        return self.code[self.code_pointer]
 
     def get_jumps_map(self):
         """
@@ -59,7 +62,7 @@ class Brainfuck(object):
         """
         return self.code
 
-    def get_data_map(self):
+    def get_data(self):
         """
             Get data values for pointer positions. Returns dictionary (sparse).
         """
@@ -74,10 +77,10 @@ class Brainfuck(object):
     def run(self, input_stream = StdinInputStream(), output_stream = StdoutOutputStream(), num_iters = None):
         current_iter = 0
         while (num_iters == None or current_iter < num_iters) and self.code_pointer < len(self.code):
-            command = self.code[self.code_pointer]
-            if command == "<" or command == ">":
+            command = self.__get_command()
+            if command in "<>":
                 self.data_pointer += 1 if command  == ">" else -1
-            elif command == "+" or command == "-":
+            elif command in "+-":
                 self.__increment_data(1 if command == "+" else -1)
             elif command == ",":
                 self.__set_data(ord(input_stream.get_char()))
